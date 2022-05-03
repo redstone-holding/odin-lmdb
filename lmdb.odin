@@ -7,7 +7,7 @@ import "core:log"
  * TODO: Split binding into separate file
  */
 
-when ODIN_OS == "windows" {
+when ODIN_OS == .Windows {
   foreign import lmdb_lib "system:lmdb.lib";
 } else {
   foreign import lmdb_lib "system:lmdb";
@@ -232,8 +232,8 @@ example :: proc() -> Error {
     key := 42;
     str := "Hey LDMB";
     kv  := Val{size_of(key), &key};
-    dv  := Val{len(str), str};
-    put(txn, key, dat) or_return;
+    dv  := Val{len(str), &str};
+    put(txn, dbi, &kv, &dv, 0) or_return;
   }
 
   return .Ok;

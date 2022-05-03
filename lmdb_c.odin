@@ -5,7 +5,7 @@ import "core:fmt"
 import "core:log"
 import "core:strings"
 
-when ODIN_OS == "windows" {
+when ODIN_OS == .Windows {
 	foreign import lmdb_lib "system:lmdb.lib";
 } else {
 	foreign import lmdb_lib "system:lmdb";
@@ -25,6 +25,12 @@ foreign lmdb_lib {
 
 	// http://www.lmdb.tech/doc/group__mdb.html#ga4366c43ada8874588b6a62fbda2d1e95
 	mdb_env_close   :: proc(env: ^Env) ---;
+
+	// http://www.lmdb.tech/doc/group__mdb.html#ga5d51d6130325f7353db0955dbedbc378
+	mdb_env_copy		:: proc(env: ^Env, path: cstring) -> i32 ---;
+
+	// http://www.lmdb.tech/doc/group__mdb.html#ga470b0bcc64ac417de5de5930f20b1a28
+	mdb_env_copyfd	:: proc(env: ^Env, fd: i32) -> i32 ---;
 
 	// http://www.lmdb.tech/doc/group__mdb.html#gad7ea55da06b77513609efebd44b26920
 	mdb_txn_begin   :: proc(env: ^Env, parent: ^Txn, flags: u32, txn: ^^Txn) -> i32 ---;
@@ -60,10 +66,26 @@ foreign lmdb_lib {
 	mdb_strerror    :: proc(err: i32) -> cstring ---;
 }
 
+
+// A handle for an individual database in the DB environment.
+// http://www.lmdb.tech/doc/group__mdb.html#gadbe68a06c448dfb62da16443d251a78b
 Dbi :: u32
+
+
+// Opaque structure for a database environment.
+// http://www.lmdb.tech/doc/group__internal.html#structMDB__env
 Env :: struct { }
+
+
+// Opaque structure for a transaction handle.
+// http://www.lmdb.tech/doc/group__internal.html#structMDB__txn
 Txn :: struct { }
+
+
+// Opaque structure for navigating through a database.
+// http://www.lmdb.tech/doc/group__internal.html#structMDB__cursor
 Cur :: struct { }
+
 
 // Generic structure used for passing keys and data in and out of the database.
 // http://www.lmdb.tech/doc/group__mdb.html#structMDB__val
@@ -83,6 +105,19 @@ Stat :: struct {
   overflow_pages:  c.size_t,  // Number of overflow pages
   entries:         c.size_t,  // Number of data items
 }
+
+
+// Information about the environment
+// http://www.lmdb.tech/doc/group__mdb.html#structMDB__envinfo
+Env_Info :: struct {
+	me_mapaddr:      rawptr,    // Address of map, if fixed
+	me_mapsize:      c.size_t,  // Size of the data memory map
+	me_last_pgno:    c.size_t,  // ID of the last used page
+	me_last_txnid:   c.size_t,  // ID of the last committed transaction
+	me_maxreaders:   uint,      // max reader slots in the environment
+	me_numreaders:   uint,      // max reader slots used in the environment
+}
+
 
 // Cmp_Proc :: #type proc "c" (data, hint: rawptr);
 
