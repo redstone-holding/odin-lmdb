@@ -125,7 +125,7 @@ Error :: enum {
 
 
 Ctx :: struct {
-  env: ^Env,
+	env: ^Env,
 	txn: ^Txn,
 	dbi: Dbi,
 }
@@ -218,25 +218,25 @@ error_string :: proc (err: Error) -> string {
 
 
 example :: proc() -> Error {
-  env := create_environment() or_return;
-  open_environment(env, "./db", .None, 0644) or_return
-  defer close_environment(env);
+	env := create_environment() or_return;
+	open_environment(env, "./db", .None, 0644) or_return
+	defer close_environment(env);
 
-  txn := begin_transaction(env) or_return;
-  defer commit_transaction(txn);
+	txn := begin_transaction(env) or_return;
+	defer commit_transaction(txn);
 
 	dbi := open_dbi(txn, nil, .None) or_return;
-  defer close_dbi(env, dbi);
+	defer close_dbi(env, dbi);
 
-  {
-    key := 42;
-    str := "Hey LDMB";
-    kv  := Val{size_of(key), &key};
-    dv  := Val{len(str), &str};
-    put(txn, dbi, &kv, &dv, 0) or_return;
-  }
+	{
+		key := 42;
+		str := "Hey LDMB";
+		kv  := Val{size_of(key), &key};
+		dv  := Val{len(str), &str};
+		put(txn, dbi, &kv, &dv, 0) or_return;
+	}
 
-  return .Ok;
+	return .Ok;
 }
 
 
